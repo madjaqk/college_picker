@@ -70,8 +70,99 @@
 		<p>Math SAT score: <input type="text" id="math_sat"></p>
 		<p>Critical reading SAT score: <input type="text" id="reading_sat"></p>
 		Region of School<br>
-<button type="button" class="btn btn-info" data-toggle="collapse" data-target="#demo">Click to Select by Region</button>
-		<div id="demo" class="collapse">
+		<label>Budget for tuition per year:
+			<select name='Select Budget'><br>
+				<option>Choose a Range</option>
+				<option value='..10000'>10k or under</option>
+				<option value='20000..30000'>20k to 30k</option>
+				<option value='30000..40000'>30k to 40k</option>
+				<option value='40000..'>40k to 60k</option>
+			</select>
+		</label>
+		<div class="container">
+			<button type="button" class="btn btn-info" data-toggle="collapse" data-target="#demo">Location of school:</button>
+			<div id="demo" class="collapse">
+				<table class='table table-bordered fixed'>
+				<tr>
+					<td><input type="checkbox" name="state" value="1">Alabama</td>
+					<td><input type="checkbox" name="state" value="2">Alaska</td>
+					<td><input type="checkbox" name="state" value="4">Arizona</td>
+					<td><input type="checkbox" name="state" value="5">Arkansas</td>
+					<td><input type="checkbox" name="state" value="6">California</td>
+					<td><input type="checkbox" name="state" value="8">Colorado</td>
+				</tr>
+				<tr>
+					<td><input type="checkbox" name="state" value="9">Connecticut</td>
+					<td><input type="checkbox" name="state" value="10">Delaware</td>
+					<td><input type="checkbox" name="state" value="11">District if Columbia</td>
+					<td><input type="checkbox" name="state" value="12">Florida</td>
+					<td><input type="checkbox" name="state" value="13">Georgia</td>
+					<td><input type="checkbox" name="state" value="15">Hawaii</td>
+				</tr>
+				<tr>
+					<td><input type="checkbox" name="state" value="16">Idaho</td>
+					<td><input type="checkbox" name="state" value="17">Illnois</td>
+					<td><input type="checkbox" name="state" value="18">Indiana</td>
+					<td><input type="checkbox" name="state" value="19">Iowa</td>
+					<td><input type="checkbox" name="state" value="20">Kansas</td>
+					<td><input type="checkbox" name="state" value="21">Kentucky</td>
+					
+				</tr>
+				<tr>
+					<td><input type="checkbox" name="state" value="22">Louisiana</td>
+					<td><input type="checkbox" name="state" value="23">Maine</td>
+					<td><input type="checkbox" name="state" value="24">Maryland</td>
+					<td><input type="checkbox" name="state" value="25">Massachusetts</td>
+					<td><input type="checkbox" name="state" value="26">Michigan</td>
+					<td><input type="checkbox" name="state" value="27">Minnesota</td>
+				</tr>
+				<tr>
+					<td><input type="checkbox" name="state" value="28">Mississippi</td>
+					<td><input type="checkbox" name="state" value="29">Missouri</td>
+					<td><input type="checkbox" name="state" value="30">Montana</td>
+					<td><input type="checkbox" name="state" value="31">Nebraska</td>
+					<td><input type="checkbox" name="state" value="32">Nevada</td>
+					<td><input type="checkbox" name="state" value="33">New Hampshire</td>
+				</tr>
+				<tr>
+					<td><input type="checkbox" name="state" value="34">New Jersey</td>
+					<td><input type="checkbox" name="state" value="35">New Mexico</td>
+					<td><input type="checkbox" name="state" value="36">New York</td>
+					<td><input type="checkbox" name="state" value="37">North Caroline</td>
+					<td><input type="checkbox" name="state" value="38">North Dakota</td>
+					<td><input type="checkbox" name="state" value="39">Ohio</td>
+				</tr>
+				<tr>
+					<td><input type="checkbox" name="state" value="40">Oklahoma</td>
+					<td><input type="checkbox" name="state" value="41">Oregon</td>
+					<td><input type="checkbox" name="state" value="42">Penssylvania</td>
+					<td><input type="checkbox" name="state" value="44">Rhode Island</td>
+					<td><input type="checkbox" name="state" value="45">South Carolina</td>
+					<td><input type="checkbox" name="state" value="46">South Dakota</td>
+				</tr>
+				<tr>
+					<td><input type="checkbox" name="state" value="47">Tennessee</td>
+					<td><input type="checkbox" name="state" value="48">Texas</td>
+					<td><input type="checkbox" name="state" value="49">Utah</td>
+					<td><input type="checkbox" name="state" value="50">Vermont</td>
+					<td><input type="checkbox" name="state" value="51">Virginia</td>
+					<td><input type="checkbox" name="state" value="53">Washington</td>
+				</tr>
+				<tr>
+					<td><input type="checkbox" name="state" value="54">West Virginia</td>
+					<td><input type="checkbox" name="state" value="55">Wisconsin</td>
+					<td><input type="checkbox" name="state" value="56">Wyoming</td>
+					<td><input type="checkbox" name="state" value="60">American Samoa</td>
+					<td><input type="checkbox" name="state" value="64">Federated States of Micronesia</td>
+					<td><input type="checkbox" name="state" value="66">Guam</td>
+				</tr>
+				<tr>
+					<td><input type="checkbox" name="state" value="69">Northern Mariana Island</td>
+					<td><input type="checkbox" name="state" value="70">Palau</td>
+					<td><input type="checkbox" name="state" value="72">Puerto Rico</td>
+					<td><input type="checkbox" name="state" value="78">Virgin Island</td>
+				</tr>
+				</table>
 			(Hover over region to view specific states)<br>
 			<label title='(CT, ME, MA, NH, RI, VT)'><input type='checkbox' name='region' value='1' >New England </label><br>
 			<label title='(DE, DC, MD, NJ, NY, PA)'><input type='checkbox' name='region' value='2'>Mid East </label><br>
@@ -81,6 +172,7 @@
 			<label title='(AZ, NM, OK, TX)'><input type='checkbox' name='region' value='6'>Southwest </label><br>
 			<label title='(CO, ID, MT, UT, WY)'><input type='checkbox' name='region' value='7'>Rocky Mountains </label><br>
 			<label title='(AK, CA, HI, NV, OR, WA)'><input type='checkbox' name='region' value='8'>Far West </label><br>
+			</div>
 		</div>
 		<button id="generate">Generate list</button>
 	</div>
