@@ -2,7 +2,9 @@
 <html>
 <head>
 	<title>College Finder</title>
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	<script>
 		$(document).ready(function(){
 			
@@ -16,24 +18,32 @@
 				reading = $("#reading_sat").val()
 				math = $("#math_sat").val()
 
-				url = "https://api.data.gov/ed/collegescorecard/v1/schools?fields=school.name,id,2013.admissions.sat_scores.midpoint.math,2013.admissions.sat_scores.midpoint.critical_reading,2013.admissions.sat_scores.midpoint.writing"
+				url = "https://api.data.gov/ed/collegescorecard/v1/schools?fields=school.name,id,2013.admissions.sat_scores.midpoint.math,2013.admissions.sat_scores.midpoint.critical_reading,2013.admissions.sat_scores.midpoint.writing,2013.aid.loan_principal,2011.earnings.6_yrs_after_entry.median"
 				if(regions.length > 0) {
 					url += "&school.region_id=" + regions.join(",")
 				}
 				if(math) {
 					url += "&2013.admissions.sat_scores.midpoint.math__range=.." + math
-				} 
+				} else {
+					url += "&2013.admissions.sat_scores.midpoint.math__range=200.."
+				}
+
 				if(reading) {
 					url += "&2013.admissions.sat_scores.midpoint.critical_reading__range=.." + reading
+				} else {
+					url += "&2013.admissions.sat_scores.midpoint.critical_reading__range=200.."
 				}
 				
-				url += "&_per_page=100&api_key=80Iv1QF5ejtA5Hj8GzHCX8i3Lg3ERCAgkeo7lQjq"
+				url += "&_sort=2013.aid.loan_principal&_per_page=100&api_key=80Iv1QF5ejtA5Hj8GzHCX8i3Lg3ERCAgkeo7lQjq"
 				$.get(url, function(res) {
 					schools = res["results"];
 					schools.sort(function(a, b) {
-						var a_sum = a["2013.admissions.sat_scores.midpoint.math"] + a["2013.admissions.sat_scores.midpoint.critical_reading"];
-						var b_sum = b["2013.admissions.sat_scores.midpoint.math"] + b["2013.admissions.sat_scores.midpoint.critical_reading"];
-						return b_sum - a_sum
+						// var a_sum = a["2013.admissions.sat_scores.midpoint.math"] + a["2013.admissions.sat_scores.midpoint.critical_reading"];
+						// var b_sum = b["2013.admissions.sat_scores.midpoint.math"] + b["2013.admissions.sat_scores.midpoint.critical_reading"];
+						// return b_sum - a_sum
+						var a_diff = a["2011.earnings.6_yrs_after_entry.median"] - a["2013.aid.loan_principal"]
+						var b_diff = b["2011.earnings.6_yrs_after_entry.median"] - b["2013.aid.loan_principal"]
+						return b_diff - a_diff
 					});
 					$(".school_list").html("<ol id='schools'>")
 					for(var i = 0; i < schools.length; i++){
@@ -42,6 +52,10 @@
 						output += " -- "
 						output += schools[i]["2013.admissions.sat_scores.midpoint.math"] + schools[i]["2013.admissions.sat_scores.midpoint.critical_reading"]
 						output += ` (${schools[i]["2013.admissions.sat_scores.midpoint.math"]} math, ${schools[i]["2013.admissions.sat_scores.midpoint.critical_reading"]} reading)`
+						output += " -- "
+						output += `$ ${schools[i]["2013.aid.loan_principal"]} debt`
+						output += " -- "
+						output += `$ ${schools[i]["2011.earnings.6_yrs_after_entry.median"]} median earnings six years after entry`
 						output += "</li>"
 						$("#schools").append(output)
 					}
@@ -56,15 +70,18 @@
 		<p>Math SAT score: <input type="text" id="math_sat"></p>
 		<p>Critical reading SAT score: <input type="text" id="reading_sat"></p>
 		Region of School<br>
-	    <input type='checkbox' name='region' value='1'>New England<br>
-	    <input type='checkbox' name='region' value='2'>Mid East<br>
-	    <input type='checkbox' name='region' value='3'>Great Lakes<br>
-	    <input type='checkbox' name='region' value='4'>Plains<br>
-	    <input type='checkbox' name='region' value='5'>Southeast<br>
-	    <input type='checkbox' name='region' value='6'>Southwest<br>
-	    <input type='checkbox' name='region' value='7'>Rocky Mountains<br>
-	    <input type='checkbox' name='region' value='8'>Far West<br>
-	    <input type='checkbox' name='region' value='9'>Outlying Areas<br>
+<button type="button" class="btn btn-info" data-toggle="collapse" data-target="#demo">Click to Select by Region</button>
+		<div id="demo" class="collapse">
+			(Hover over region to view specific states)<br>
+			<label title='(CT, ME, MA, NH, RI, VT)'><input type='checkbox' name='region' value='1' >New England </label><br>
+			<label title='(DE, DC, MD, NJ, NY, PA)'><input type='checkbox' name='region' value='2'>Mid East </label><br>
+			<label title='(IL, IN, MI, OH, WI)'><input type='checkbox' name='region' value='3'>Great Lakes </label><br>
+			<label title='(IA, KS, MN, MO, NE, ND, SD)'><input type='checkbox' name='region' value='4'>Plains </label><br>
+			<label title='(AL, AR, FL, GA, KY, LA, MS, NC, SC, TN, VA, WV)'><input type='checkbox' name='region' value='5'>Southeast </label><br>
+			<label title='(AZ, NM, OK, TX)'><input type='checkbox' name='region' value='6'>Southwest </label><br>
+			<label title='(CO, ID, MT, UT, WY)'><input type='checkbox' name='region' value='7'>Rocky Mountains </label><br>
+			<label title='(AK, CA, HI, NV, OR, WA)'><input type='checkbox' name='region' value='8'>Far West </label><br>
+		</div>
 		<button id="generate">Generate list</button>
 	</div>
 	<div class="school_list">
