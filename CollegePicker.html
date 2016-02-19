@@ -5,23 +5,65 @@
 	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
 	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+	<style type="text/css">
+	body{
+		/*background-color: #F28EBB;*/
+		background-color: #6495ED;
+		padding: 25px;
+	}
+/*	#input_fields{
+		border: 5px solid blue;
+	}*/
+	#results{
+		/*border: 5px solid blue;*/
+		display: inline-block;
+		width: 100%;
+		height: 700px;
+	}
+	#sidebar{
+		/*border: 5px solid blue;*/
+		width: 29%;
+		height: auto;
+		left: 10;
+		top: 50;
+		text-align: left; 
+		display: inline-block;
+	}
+	#main_page{
+		border: 5px solid blue;
+		display: inline-block;
+		width: 70%;
+		margin: 0px 0px 0px 0px;
+		float: right;
+		vertical-align: top;
+		visibility: hidden;
+	}
+	</style>
 	<script>
 		$(document).ready(function(){
 			
 			$("#generate").click(function() {
-				var regions = []
-				$("input[name='region']").each( function() {
-					if($(this).is(":checked")) { regions.push($(this).val()) }
-				})
-				console.log(regions)
+				var states = []
+				$("input[name='state']").each( function() {
+					if($(this).is(":checked")) { states.push($(this).val()) }
+				});
 
-				reading = $("#reading_sat").val()
-				math = $("#math_sat").val()
+				var sizes = []
+				$("input[name='citySize']").each( function() {
+					if($(this).is(":checked")) { sizes.push($(this).val()) }
+				});
 
-				url = "https://api.data.gov/ed/collegescorecard/v1/schools?fields=school.name,id,2013.admissions.sat_scores.midpoint.math,2013.admissions.sat_scores.midpoint.critical_reading,2013.admissions.sat_scores.midpoint.writing,2013.aid.loan_principal,2011.earnings.6_yrs_after_entry.median"
-				if(regions.length > 0) {
-					url += "&school.region_id=" + regions.join(",")
+				var reading = $("#reading_sat").val()
+				var math = $("#math_sat").val()
+
+				var url = "https://api.data.gov/ed/collegescorecard/v1/schools?fields=school.name,id,2013.admissions.sat_scores.midpoint.math,2013.admissions.sat_scores.midpoint.critical_reading,2013.admissions.sat_scores.midpoint.writing,2013.cost.attendance.academic_year,2011.earnings.6_yrs_after_entry.median&2011.earnings.6_yrs_after_entry.median__range=10.."
+				if(states.length > 0) {
+					url += "&school.state_fips=" + states.join(",")
 				}
+				if(sizes.length > 0) {
+					url += "&school.degree_urbanization=" + sizes.join(",")
+				}
+
 				if(math) {
 					url += "&2013.admissions.sat_scores.midpoint.math__range=.." + math
 				} else {
@@ -33,36 +75,64 @@
 				} else {
 					url += "&2013.admissions.sat_scores.midpoint.critical_reading__range=200.."
 				}
+
+				if($("#budget").val()!="Choose a Range") {
+					url+="&2013.cost.attendance.academic_year__range=" + $("#budget").val()
+				}
 				
-				url += "&_sort=2013.aid.loan_principal&_per_page=100&api_key=80Iv1QF5ejtA5Hj8GzHCX8i3Lg3ERCAgkeo7lQjq"
+				url += "&_sort=2013.cost.attendance.academic_year&_per_page=100&api_key=80Iv1QF5ejtA5Hj8GzHCX8i3Lg3ERCAgkeo7lQjq"
+				console.log(url)
 				$.get(url, function(res) {
 					schools = res["results"];
 					schools.sort(function(a, b) {
 						// var a_sum = a["2013.admissions.sat_scores.midpoint.math"] + a["2013.admissions.sat_scores.midpoint.critical_reading"];
 						// var b_sum = b["2013.admissions.sat_scores.midpoint.math"] + b["2013.admissions.sat_scores.midpoint.critical_reading"];
 						// return b_sum - a_sum
-						var a_diff = a["2011.earnings.6_yrs_after_entry.median"] - a["2013.aid.loan_principal"]
-						var b_diff = b["2011.earnings.6_yrs_after_entry.median"] - b["2013.aid.loan_principal"]
+						var a_diff = a["2011.earnings.6_yrs_after_entry.median"] - a["2013.cost.attendance.academic_year"]
+						var b_diff = b["2011.earnings.6_yrs_after_entry.median"] - b["2013.cost.attendance.academic_year"]
 						return b_diff - a_diff
 					});
-					$(".school_list").html("<ol id='schools'>")
-					for(var i = 0; i < schools.length; i++){
-						output = "<li>"
+					$(".school_list").html("<h4>Top ten for you!</h4><ol id='schools'>")
+					for(var i = 0; i < schools.length && i < 10; i++){
+						output = `<li class="school" id=${schools[i]["id"]}>`
 						output += schools[i]["school.name"]
-						output += " -- "
-						output += schools[i]["2013.admissions.sat_scores.midpoint.math"] + schools[i]["2013.admissions.sat_scores.midpoint.critical_reading"]
-						output += ` (${schools[i]["2013.admissions.sat_scores.midpoint.math"]} math, ${schools[i]["2013.admissions.sat_scores.midpoint.critical_reading"]} reading)`
-						output += " -- "
-						output += `$ ${schools[i]["2013.aid.loan_principal"]} debt`
-						output += " -- "
-						output += `$ ${schools[i]["2011.earnings.6_yrs_after_entry.median"]} median earnings six years after entry`
+						// output += " -- "
+						// output += schools[i]["2013.admissions.sat_scores.midpoint.math"] + schools[i]["2013.admissions.sat_scores.midpoint.critical_reading"]
+						// output += ` (${schools[i]["2013.admissions.sat_scores.midpoint.math"]} math, ${schools[i]["2013.admissions.sat_scores.midpoint.critical_reading"]} reading)`
+						// output += " -- "
+						// output += "$" + schools[i]["2011.earnings.6_yrs_after_entry.median"].toFixed(0).replace(/(\d)(?=(\d{3})+$)/g, '$1,') + " median earnings six years after entry"
+						// output += " -- "
+						// output += "$" + schools[i]["2013.cost.attendance.academic_year"].toFixed(0).replace(/(\d)(?=(\d{3})+$)/g, '$1,') + " tuition"
+						
 						output += "</li>"
 						$("#schools").append(output)
 					}
 					$(".school_list").append("</ol>")
+					add_listeners();
 				});
+				
 			});
 		});
+
+	function add_listeners() {
+		$(".school").click(function() {
+			
+			var url = "https://api.data.gov/ed/collegescorecard/v1/schools?fields=school.name,id,2013.admissions.sat_scores.midpoint.math,2013.admissions.sat_scores.midpoint.critical_reading,2013.admissions.sat_scores.midpoint.writing,2013.cost.attendance.academic_year,2011.earnings.6_yrs_after_entry.median,school.state,2013.admissions.admission_rate.overall,2013.student.size&id="+$(this).attr("id")+"&api_key=80Iv1QF5ejtA5Hj8GzHCX8i3Lg3ERCAgkeo7lQjq"
+			$.get(url, function(res) {
+				info = res["results"][0]
+				console.log(info)
+				$(".school_name").html(info["school.name"])
+				$(".school_state").html(info["school.state"])
+				$(".school_yearlyCost").html("$"+info["2013.cost.attendance.academic_year"].toFixed(0).replace(/(\d)(?=(\d{3})+$)/g, '$1,'))
+				$(".school_earnings").html("$"+info["2011.earnings.6_yrs_after_entry.median"].toFixed(0).replace(/(\d)(?=(\d{3})+$)/g, '$1,'))
+				$(".school_admRate").html((info["2013.admissions.admission_rate.overall"]*100).toFixed(2)+"%")
+				$(".school_satScores").html(`${info["2013.admissions.sat_scores.midpoint.math"]} math, ${info["2013.admissions.sat_scores.midpoint.critical_reading"]} critical reading`)
+				$(".school_Students").html(info["2013.student.size"].toFixed(0).replace(/(\d)(?=(\d{3})+$)/g, '$1,'))
+				// Thanks to StackOverflow user VisioN for this regex to to add commas to long numbers
+			});
+			$("#main_page").css("visibility", "visible")
+		});
+	}
 	</script>
 </head>
 <body>
@@ -71,7 +141,7 @@
 		<p>Critical reading SAT score: <input type="text" id="reading_sat"></p>
 		Region of School<br>
 		<label>Budget for tuition per year:
-			<select name='Select Budget'><br>
+			<select name='Select Budget' id="budget"><br>
 				<option>Choose a Range</option>
 				<option value='..10000'>10k or under</option>
 				<option value='20000..30000'>20k to 30k</option>
@@ -83,100 +153,144 @@
 			<button type="button" class="btn btn-info" data-toggle="collapse" data-target="#demo">Location of school:</button>
 			<div id="demo" class="collapse">
 				<table class='table table-bordered fixed'>
-				<tr>
-					<td><input type="checkbox" name="state" value="1">Alabama</td>
-					<td><input type="checkbox" name="state" value="2">Alaska</td>
-					<td><input type="checkbox" name="state" value="4">Arizona</td>
-					<td><input type="checkbox" name="state" value="5">Arkansas</td>
-					<td><input type="checkbox" name="state" value="6">California</td>
-					<td><input type="checkbox" name="state" value="8">Colorado</td>
-				</tr>
-				<tr>
-					<td><input type="checkbox" name="state" value="9">Connecticut</td>
-					<td><input type="checkbox" name="state" value="10">Delaware</td>
-					<td><input type="checkbox" name="state" value="11">District if Columbia</td>
-					<td><input type="checkbox" name="state" value="12">Florida</td>
-					<td><input type="checkbox" name="state" value="13">Georgia</td>
-					<td><input type="checkbox" name="state" value="15">Hawaii</td>
-				</tr>
-				<tr>
-					<td><input type="checkbox" name="state" value="16">Idaho</td>
-					<td><input type="checkbox" name="state" value="17">Illnois</td>
-					<td><input type="checkbox" name="state" value="18">Indiana</td>
-					<td><input type="checkbox" name="state" value="19">Iowa</td>
-					<td><input type="checkbox" name="state" value="20">Kansas</td>
-					<td><input type="checkbox" name="state" value="21">Kentucky</td>
-					
-				</tr>
-				<tr>
-					<td><input type="checkbox" name="state" value="22">Louisiana</td>
-					<td><input type="checkbox" name="state" value="23">Maine</td>
-					<td><input type="checkbox" name="state" value="24">Maryland</td>
-					<td><input type="checkbox" name="state" value="25">Massachusetts</td>
-					<td><input type="checkbox" name="state" value="26">Michigan</td>
-					<td><input type="checkbox" name="state" value="27">Minnesota</td>
-				</tr>
-				<tr>
-					<td><input type="checkbox" name="state" value="28">Mississippi</td>
-					<td><input type="checkbox" name="state" value="29">Missouri</td>
-					<td><input type="checkbox" name="state" value="30">Montana</td>
-					<td><input type="checkbox" name="state" value="31">Nebraska</td>
-					<td><input type="checkbox" name="state" value="32">Nevada</td>
-					<td><input type="checkbox" name="state" value="33">New Hampshire</td>
-				</tr>
-				<tr>
-					<td><input type="checkbox" name="state" value="34">New Jersey</td>
-					<td><input type="checkbox" name="state" value="35">New Mexico</td>
-					<td><input type="checkbox" name="state" value="36">New York</td>
-					<td><input type="checkbox" name="state" value="37">North Caroline</td>
-					<td><input type="checkbox" name="state" value="38">North Dakota</td>
-					<td><input type="checkbox" name="state" value="39">Ohio</td>
-				</tr>
-				<tr>
-					<td><input type="checkbox" name="state" value="40">Oklahoma</td>
-					<td><input type="checkbox" name="state" value="41">Oregon</td>
-					<td><input type="checkbox" name="state" value="42">Penssylvania</td>
-					<td><input type="checkbox" name="state" value="44">Rhode Island</td>
-					<td><input type="checkbox" name="state" value="45">South Carolina</td>
-					<td><input type="checkbox" name="state" value="46">South Dakota</td>
-				</tr>
-				<tr>
-					<td><input type="checkbox" name="state" value="47">Tennessee</td>
-					<td><input type="checkbox" name="state" value="48">Texas</td>
-					<td><input type="checkbox" name="state" value="49">Utah</td>
-					<td><input type="checkbox" name="state" value="50">Vermont</td>
-					<td><input type="checkbox" name="state" value="51">Virginia</td>
-					<td><input type="checkbox" name="state" value="53">Washington</td>
-				</tr>
-				<tr>
-					<td><input type="checkbox" name="state" value="54">West Virginia</td>
-					<td><input type="checkbox" name="state" value="55">Wisconsin</td>
-					<td><input type="checkbox" name="state" value="56">Wyoming</td>
-					<td><input type="checkbox" name="state" value="60">American Samoa</td>
-					<td><input type="checkbox" name="state" value="64">Federated States of Micronesia</td>
-					<td><input type="checkbox" name="state" value="66">Guam</td>
-				</tr>
-				<tr>
-					<td><input type="checkbox" name="state" value="69">Northern Mariana Island</td>
-					<td><input type="checkbox" name="state" value="70">Palau</td>
-					<td><input type="checkbox" name="state" value="72">Puerto Rico</td>
-					<td><input type="checkbox" name="state" value="78">Virgin Island</td>
-				</tr>
+					<tr>
+						<td><label title='(CT, ME, MA, NH, RI, VT)'><input type='checkbox' name='region' value='1' >New England </label></td>
+						<td><label title='(DE, DC, MD, NJ, NY, PA)'><input type='checkbox' name='region' value='2'>Mid East </label></td>
+						<td><label title='(IL, IN, MI, OH, WI)'><input type='checkbox' name='region' value='3'>Great Lakes </label></td>
+						<td><label title='(IA, KS, MN, MO, NE, ND, SD)'><input type='checkbox' name='region' value='4'>Plains </label></td>
+						<td><label title='(AL, AR, FL, GA, KY, LA, MS, NC, SC, TN, VA, WV)'><input type='checkbox' name='region' value='5'>Southeast </label></td>
+						<td><label title='(AZ, NM, OK, TX)'><input type='checkbox' name='region' value='6'>Southwest </label></td>
+						<td><label title='(CO, ID, MT, UT, WY)'><input type='checkbox' name='region' value='7'>Rocky Mountains </label></td>
+						<td><label title='(AK, CA, HI, NV, OR, WA)'><input type='checkbox' name='region' value='8'>Far West </label></td>
+					</tr>
 				</table>
-			(Hover over region to view specific states)<br>
-			<label title='(CT, ME, MA, NH, RI, VT)'><input type='checkbox' name='region' value='1' >New England </label><br>
-			<label title='(DE, DC, MD, NJ, NY, PA)'><input type='checkbox' name='region' value='2'>Mid East </label><br>
-			<label title='(IL, IN, MI, OH, WI)'><input type='checkbox' name='region' value='3'>Great Lakes </label><br>
-			<label title='(IA, KS, MN, MO, NE, ND, SD)'><input type='checkbox' name='region' value='4'>Plains </label><br>
-			<label title='(AL, AR, FL, GA, KY, LA, MS, NC, SC, TN, VA, WV)'><input type='checkbox' name='region' value='5'>Southeast </label><br>
-			<label title='(AZ, NM, OK, TX)'><input type='checkbox' name='region' value='6'>Southwest </label><br>
-			<label title='(CO, ID, MT, UT, WY)'><input type='checkbox' name='region' value='7'>Rocky Mountains </label><br>
-			<label title='(AK, CA, HI, NV, OR, WA)'><input type='checkbox' name='region' value='8'>Far West </label><br>
+				<table class='table table-bordered fixed'>
+					<tr>
+						<td><input type="checkbox" name="state" value="1">Alabama</td>
+						<td><input type="checkbox" name="state" value="2">Alaska</td>
+						<td><input type="checkbox" name="state" value="4">Arizona</td>
+						<td><input type="checkbox" name="state" value="5">Arkansas</td>
+						<td><input type="checkbox" name="state" value="6">California</td>
+						<td><input type="checkbox" name="state" value="8">Colorado</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="state" value="9">Connecticut</td>
+						<td><input type="checkbox" name="state" value="10">Delaware</td>
+						<td><input type="checkbox" name="state" value="11">District if Columbia</td>
+						<td><input type="checkbox" name="state" value="12">Florida</td>
+						<td><input type="checkbox" name="state" value="13">Georgia</td>
+						<td><input type="checkbox" name="state" value="15">Hawaii</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="state" value="16">Idaho</td>
+						<td><input type="checkbox" name="state" value="17">Illnois</td>
+						<td><input type="checkbox" name="state" value="18">Indiana</td>
+						<td><input type="checkbox" name="state" value="19">Iowa</td>
+						<td><input type="checkbox" name="state" value="20">Kansas</td>
+						<td><input type="checkbox" name="state" value="21">Kentucky</td>
+						
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="state" value="22">Louisiana</td>
+						<td><input type="checkbox" name="state" value="23">Maine</td>
+						<td><input type="checkbox" name="state" value="24">Maryland</td>
+						<td><input type="checkbox" name="state" value="25">Massachusetts</td>
+						<td><input type="checkbox" name="state" value="26">Michigan</td>
+						<td><input type="checkbox" name="state" value="27">Minnesota</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="state" value="28">Mississippi</td>
+						<td><input type="checkbox" name="state" value="29">Missouri</td>
+						<td><input type="checkbox" name="state" value="30">Montana</td>
+						<td><input type="checkbox" name="state" value="31">Nebraska</td>
+						<td><input type="checkbox" name="state" value="32">Nevada</td>
+						<td><input type="checkbox" name="state" value="33">New Hampshire</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="state" value="34">New Jersey</td>
+						<td><input type="checkbox" name="state" value="35">New Mexico</td>
+						<td><input type="checkbox" name="state" value="36">New York</td>
+						<td><input type="checkbox" name="state" value="37">North Caroline</td>
+						<td><input type="checkbox" name="state" value="38">North Dakota</td>
+						<td><input type="checkbox" name="state" value="39">Ohio</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="state" value="40">Oklahoma</td>
+						<td><input type="checkbox" name="state" value="41">Oregon</td>
+						<td><input type="checkbox" name="state" value="42">Penssylvania</td>
+						<td><input type="checkbox" name="state" value="44">Rhode Island</td>
+						<td><input type="checkbox" name="state" value="45">South Carolina</td>
+						<td><input type="checkbox" name="state" value="46">South Dakota</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="state" value="47">Tennessee</td>
+						<td><input type="checkbox" name="state" value="48">Texas</td>
+						<td><input type="checkbox" name="state" value="49">Utah</td>
+						<td><input type="checkbox" name="state" value="50">Vermont</td>
+						<td><input type="checkbox" name="state" value="51">Virginia</td>
+						<td><input type="checkbox" name="state" value="53">Washington</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="state" value="54">West Virginia</td>
+						<td><input type="checkbox" name="state" value="55">Wisconsin</td>
+						<td><input type="checkbox" name="state" value="56">Wyoming</td>
+						<td><input type="checkbox" name="state" value="60">American Samoa</td>
+						<td><input type="checkbox" name="state" value="64">Federated States of Micronesia</td>
+						<td><input type="checkbox" name="state" value="66">Guam</td>
+					</tr>
+					<tr>
+						<td><input type="checkbox" name="state" value="69">Northern Mariana Island</td>
+						<td><input type="checkbox" name="state" value="70">Palau</td>
+						<td><input type="checkbox" name="state" value="72">Puerto Rico</td>
+						<td><input type="checkbox" name="state" value="78">Virgin Island</td>
+					</tr>
+				</table>
 			</div>
 		</div>
-		<button id="generate">Generate list</button>
+		<button id="generate" class='btn btn-info'>Generate list</button>
 	</div>
-	<div class="school_list">
+	<hr>
+	<div id='results'>
+		<div id='sidebar'>
+			
+			<div class="school_list">
+			</div>
+		</div>
+		<div id='main_page'>
+			<div>
+				<table>
+					<tr>
+						<td><h1>Name:</h1></td>
+						<td><h1><div class="school_name"></div></h1></td>
+					</tr>
+					<tr>
+						<td><h5>State:</h5></td>
+						<td><h5><div class="school_state"></div></h5></td>
+					</tr>
+					<tr>
+						<td><h5>Yearly Cost:</h5></td>
+						<td><h5><div class="school_yearlyCost"></div></h5></td>
+					</tr>
+					<tr>
+						<td><h5>Admissions Rate:</h5></td>
+						<td><h5><div class="school_admRate"></div></h5></td>
+					</tr>
+					<tr>
+						<td><h5>Median SAT Scores:</h5></td>
+						<td><h5><div class="school_satScores"></div></h5></td>
+					</tr>
+					<tr>
+						<td><h5>Number of Students:</h5></td>
+						<td><h5><div class="school_Students"></div></h5></td>
+					</tr>
+					<tr>	
+						<td><h5>Average Earnings after 6 Years</h5></td>
+						<td><h5><div class='school_earnings'></div></h5></td>
+					</tr>
+				</table>
+				<div id="googleMap" style="width:500px;height:300px;"></div>
+			</div>
+		</div>
 	</div>
 </body>
 </html>
